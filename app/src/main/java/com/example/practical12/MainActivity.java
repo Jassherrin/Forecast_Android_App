@@ -5,6 +5,10 @@ import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.practical12.R;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,21 +48,41 @@ public class MainActivity extends AppCompatActivity {
                         StringBuilder weatherInfo = new StringBuilder();
                         weatherInfo.append("Region Forecasts:\n\n");
 
+                        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                        SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
                         for (WeatherItem weatherItem : weatherResponse.getItems()) {
                             for (WeatherForecast period : weatherItem.getPeriods()) {
                                 ForecastRegions regions = period.getRegions();
                                 Time time = period.getTime();
                                 if (regions != null && time != null) {
-                                    weatherInfo.append("Time Period: ")
-                                            .append(time.getStart())
-                                            .append(" to ")
-                                            .append(time.getEnd())
-                                            .append("\n");
-                                    weatherInfo.append("\tWest: ").append(regions.getWest()).append("\n");
-                                    weatherInfo.append("\tEast: ").append(regions.getEast()).append("\n");
-                                    weatherInfo.append("\tCentral: ").append(regions.getCentral()).append("\n");
-                                    weatherInfo.append("\tSouth: ").append(regions.getSouth()).append("\n");
-                                    weatherInfo.append("\tNorth: ").append(regions.getNorth()).append("\n\n");
+                                    try {
+                                        Date startDate = inputDateFormat.parse(time.getStart());
+                                        Date endDate = inputDateFormat.parse(time.getEnd());
+
+                                        weatherInfo.append("Time Period: ")
+                                                .append("\n")
+                                                .append(outputDateFormat.format(startDate))
+                                                .append(" ")
+                                                .append(startDate.getHours())
+                                                .append(":")
+                                                .append(String.format("%02d", startDate.getMinutes()))
+                                                .append(" to ")
+                                                .append(outputDateFormat.format(endDate))
+                                                .append(" ")
+                                                .append(endDate.getHours())
+                                                .append(":")
+                                                .append(String.format("%02d", endDate.getMinutes()))
+                                                .append("\n");
+
+                                        weatherInfo.append("\tWest: ").append(regions.getWest()).append("\n");
+                                        weatherInfo.append("\tEast: ").append(regions.getEast()).append("\n");
+                                        weatherInfo.append("\tCentral: ").append(regions.getCentral()).append("\n");
+                                        weatherInfo.append("\tSouth: ").append(regions.getSouth()).append("\n");
+                                        weatherInfo.append("\tNorth: ").append(regions.getNorth()).append("\n\n");
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
